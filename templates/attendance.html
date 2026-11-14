@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<h3 class="mb-3">Mark attendance</h3>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-5"><select name="subject_id" class="form-select" required>
+    <option value="">Select subject</option>
+    {% for s in subjects %}<option value="{{ s.id }}" {{ 'selected' if s.id==subject_id }}>{{ s.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><input type="date" name="date" value="{{ day }}" class="form-control"></div>
+  <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Load</button></div>
+</form>
+{% if subject_id %}
+<form method="post">
+  <input type="hidden" name="subject_id" value="{{ subject_id }}"><input type="hidden" name="date" value="{{ day }}">
+  <div class="mb-2">
+    <button type="button" class="btn btn-sm btn-outline-success" onclick="setAll('Present')">All present</button>
+    <button type="button" class="btn btn-sm btn-outline-danger" onclick="setAll('Absent')">All absent</button>
+  </div>
+  <div class="card"><table class="table mb-0 align-middle">
+    <thead><tr><th>Roll no</th><th>Name</th><th>Status</th></tr></thead><tbody>
+    {% for s in students %}{% set cur = existing.get(s.id, 'Present') %}
+    <tr><td>{{ s.roll_no }}</td><td>{{ s.name }}</td><td>
+      <div class="btn-group btn-group-sm">
+        <input type="radio" class="btn-check" name="status_{{ s.id }}" id="p{{ s.id }}" value="Present" {{ 'checked' if cur=='Present' }}><label class="btn btn-outline-success" for="p{{ s.id }}">Present</label>
+        <input type="radio" class="btn-check" name="status_{{ s.id }}" id="a{{ s.id }}" value="Absent" {{ 'checked' if cur=='Absent' }}><label class="btn btn-outline-danger" for="a{{ s.id }}">Absent</label>
+      </div></td></tr>
+    {% endfor %}</tbody></table></div>
+  <button class="btn btn-primary mt-3">Save attendance</button>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+function setAll(v){ document.querySelectorAll('input[type=radio][value='+v+']').forEach(r=>r.checked=true); }
+</script>
+{% endblock %}

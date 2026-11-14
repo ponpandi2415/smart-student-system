@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ total_students }}</div><div class="text-muted">Students</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ total_subjects }}</div><div class="text-muted">Subjects</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ avg_att if avg_att is not none else '-' }}{% if avg_att is not none %}%{% endif %}</div><div class="text-muted">Average attendance</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat {{ 'stat-warn' if low_att }}"><div class="card-body"><div class="stat-num">{{ low_att|length }}</div><div class="text-muted">Below {{ ATT_LIMIT }}% attendance</div></div></div></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-7"><div class="card"><div class="card-body"><h6>Average marks by subject</h6><canvas id="subChart" height="140"></canvas></div></div></div>
+  <div class="col-lg-5"><div class="card"><div class="card-body"><h6>Students by department</h6><canvas id="deptChart" height="200"></canvas></div></div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card"><div class="card-header">Top performers</div>
+    <table class="table mb-0"><tbody>
+    {% for t in toppers %}<tr><td>{{ loop.index }}</td><td><a href="{{ url_for('student_detail', sid=t.id) }}">{{ t.name }}</a><div class="small text-muted">{{ t.roll_no }}</div></td><td class="text-end fw-semibold">{{ t.avg }}</td></tr>
+    {% else %}<tr><td class="text-muted p-3">No marks entered yet</td></tr>{% endfor %}
+    </tbody></table></div></div>
+  <div class="col-lg-6"><div class="card"><div class="card-header">Low attendance alerts</div>
+    <table class="table mb-0"><tbody>
+    {% for l in low_att %}<tr><td><a href="{{ url_for('student_detail', sid=l.id) }}">{{ l.name }}</a><div class="small text-muted">{{ l.roll_no }}</div></td><td class="text-end"><span class="badge text-bg-danger">{{ l.pct }}%</span></td></tr>
+    {% else %}<tr><td class="text-muted p-3">Everyone is above {{ ATT_LIMIT }}%</td></tr>{% endfor %}
+    </tbody></table></div></div>
+</div>
+
+<div class="mt-4">
+  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('report_students') }}">Download student report (CSV)</a>
+  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('report_marks') }}">Download marks report (CSV)</a>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+new Chart(document.getElementById('subChart'), {
+  type: 'bar',
+  data: { labels: {{ sub_labels|tojson }}, datasets: [{ label: 'Average marks', data: {{ sub_data|tojson }}, backgroundColor: '#2f6f8f' }] },
+  options: { scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
+});
+new Chart(document.getElementById('deptChart'), {
+  type: 'doughnut',
+  data: { labels: {{ dept_labels|tojson }}, datasets: [{ data: {{ dept_data|tojson }}, backgroundColor: ['#2f6f8f','#8fb8c9','#d9a441','#7a9e6b','#b5654a'] }] }
+});
+</script>
+{% endblock %}

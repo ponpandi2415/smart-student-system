@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Attendance report{% endblock %}
+{% block content %}
+<h3 class="mb-3">Attendance report</h3>
+<p class="text-muted">Students below {{ ATT_LIMIT }}% are highlighted. Use "Send alert" to open a ready-made email.</p>
+<div class="card"><table class="table mb-0 align-middle">
+<thead><tr><th>Roll no</th><th>Name</th><th>Present / Total</th><th style="width:30%">Attendance</th><th></th></tr></thead><tbody>
+{% for r in rows %}
+<tr class="{{ 'table-danger' if r.pct is not none and r.pct < ATT_LIMIT }}">
+  <td>{{ r.roll_no }}</td><td><a href="{{ url_for('student_detail', sid=r.id) }}">{{ r.name }}</a></td>
+  <td>{{ r.present }} / {{ r.total }}</td>
+  <td>{% if r.pct is not none %}<div class="progress" style="height:18px"><div class="progress-bar {{ 'bg-danger' if r.pct < ATT_LIMIT else 'bg-success' }}" style="width: {{ r.pct }}%">{{ r.pct }}%</div></div>{% else %}-{% endif %}</td>
+  <td class="text-end">{% if r.pct is not none and r.pct < ATT_LIMIT and r.email %}
+    <a class="btn btn-sm btn-danger" href="mailto:{{ r.email }}?subject=Low attendance warning&body=Dear {{ r.name }}, your attendance is {{ r.pct }}%, which is below the required {{ ATT_LIMIT }}%. Please meet your class advisor.">Send alert</a>{% endif %}</td>
+</tr>
+{% endfor %}</tbody></table></div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5 col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h4 class="mb-1">Smart Student System</h4>
+        <p class="text-muted">Sign in to continue</p>
+        <form method="post">
+          <div class="mb-3"><label class="form-label">Username</label>
+            <input name="username" class="form-control" required autofocus></div>
+          <div class="mb-3"><label class="form-label">Password</label>
+            <input name="password" type="password" class="form-control" required></div>
+          <button class="btn btn-primary w-100">Login</button>
+        </form>
+        <hr>
+        <div class="small text-muted">
+          Demo logins:<br>
+          Admin: <code>admin / admin123</code><br>
+          Teacher: <code>teacher / teacher123</code><br>
+          Student: <code>21CSE101 / 21CSE101</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

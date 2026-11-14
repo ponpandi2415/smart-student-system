@@ -1,0 +1,6 @@
+body { background: #f4f6f8; }
+.app-nav { background: #1f4e63; }
+.stat .stat-num { font-size: 1.9rem; font-weight: 600; line-height: 1.1; }
+.stat-warn { border-color: #dc3545; }
+.card { border-color: #e1e5ea; }
+.card-header { background: #fff; font-weight: 600; }

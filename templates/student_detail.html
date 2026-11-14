@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ s.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div><h3 class="mb-0">{{ s.name }}</h3>
+  <div class="text-muted">{{ s.roll_no }} &middot; {{ s.dept }} &middot; Year {{ s.year }}{% if s.email %} &middot; {{ s.email }}{% endif %}</div></div>
+  {% set cls = {'On track':'success','Needs attention':'warning','High risk':'danger'}.get(st.risk,'secondary') %}
+  <span class="badge text-bg-{{ cls }} fs-6">{{ st.risk }}</span>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ st.overall_att if st.overall_att is not none else '-' }}{% if st.overall_att is not none %}%{% endif %}</div><div class="text-muted">Attendance</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ st.avg_marks if st.avg_marks is not none else '-' }}</div><div class="text-muted">Average marks</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ st.gpa if st.gpa is not none else '-' }}</div><div class="text-muted">GPA (10 point)</div></div></div></div>
+  <div class="col-6 col-md-3"><div class="card stat"><div class="card-body"><div class="stat-num">{{ st.pred if st.pred is not none else '-' }}</div><div class="text-muted">Predicted next exam</div></div></div></div>
+</div>
+
+{% if st.alerts %}
+<div class="alert alert-warning"><strong>Alerts</strong><ul class="mb-0">{% for a in st.alerts %}<li>{{ a }}</li>{% endfor %}</ul></div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card mb-3"><div class="card-header">Marks by subject</div>
+    <div class="table-responsive"><table class="table mb-0 align-middle">
+      <thead><tr><th>Subject</th>{% for e in EXAM_TYPES %}<th>{{ e }}</th>{% endfor %}<th>Avg</th><th>Grade</th><th>Predicted</th></tr></thead><tbody>
+      {% for x in st.subjects %}<tr><td>{{ x.subject }}</td>
+        {% for e in EXAM_TYPES %}<td>{{ x.exams.get(e, '-') }}</td>{% endfor %}
+        <td class="fw-semibold">{{ x.avg }}</td><td>{{ x.grade }}</td><td>{{ x.pred }}</td></tr>
+      {% else %}<tr><td colspan="8" class="text-muted p-3">No marks yet</td></tr>{% endfor %}
+      </tbody></table></div></div>
+    <div class="card"><div class="card-body"><h6>Performance trend (average of all subjects)</h6><canvas id="trend" height="110"></canvas></div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card"><div class="card-header">Attendance by subject</div>
+    <div class="card-body">
+      {% for a in st.attendance %}
+      <div class="mb-3"><div class="d-flex justify-content-between small"><span>{{ a.subject }}</span><span>{{ a.present }}/{{ a.total }} &middot; {{ a.pct }}%</span></div>
+        <div class="progress" style="height:10px"><div class="progress-bar {{ 'bg-danger' if a.pct < ATT_LIMIT else 'bg-success' }}" style="width: {{ a.pct }}%"></div></div></div>
+      {% else %}<div class="text-muted">No attendance recorded</div>{% endfor %}
+    </div></div>
+  </div>
+</div>
+<p class="text-muted small mt-3">Predicted marks use linear regression over the exams taken so far. Grades: O 90+, A+ 80+, A 70+, B+ 60+, B 50+, C 40+, F below 40.</p>
+{% endblock %}
+{% block scripts %}
+<script>
+new Chart(document.getElementById('trend'), {
+  type: 'line',
+  data: { labels: {{ EXAM_TYPES|tojson }}, datasets: [{ label: 'Average marks', data: {{ st.exam_avgs|tojson }}, borderColor: '#2f6f8f', backgroundColor: '#2f6f8f', tension: .25, spanGaps: true }] },
+  options: { scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } }
+});
+</script>
+{% endblock %}

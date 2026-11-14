@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Marks{% endblock %}
+{% block content %}
+<h3 class="mb-3">Enter marks</h3>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-5"><select name="subject_id" class="form-select" required>
+    <option value="">Select subject</option>
+    {% for s in subjects %}<option value="{{ s.id }}" {{ 'selected' if s.id==subject_id }}>{{ s.name }}</option>{% endfor %}</select></div>
+  <div class="col-md-3"><select name="exam_type" class="form-select">{% for e in EXAM_TYPES %}<option {{ 'selected' if e==exam }}>{{ e }}</option>{% endfor %}</select></div>
+  <div class="col-md-2"><button class="btn btn-outline-secondary w-100">Load</button></div>
+</form>
+{% if subject_id %}
+<form method="post">
+  <input type="hidden" name="subject_id" value="{{ subject_id }}"><input type="hidden" name="exam_type" value="{{ exam }}">
+  <div class="card"><table class="table mb-0 align-middle">
+    <thead><tr><th>Roll no</th><th>Name</th><th style="width:160px">Marks (0-100)</th><th>Grade</th></tr></thead><tbody>
+    {% for s in students %}{% set m = existing.get(s.id) %}
+    <tr><td>{{ s.roll_no }}</td><td>{{ s.name }}</td>
+      <td><input name="marks_{{ s.id }}" type="number" step="0.5" min="0" max="100" class="form-control form-control-sm" value="{{ m if m is not none }}"></td>
+      <td>{% if m is not none %}{{ grade_of(m)[0] }}{% endif %}</td></tr>
+    {% endfor %}</tbody></table></div>
+  <button class="btn btn-primary mt-3">Save marks</button>
+</form>
+{% endif %}
+{% endblock %}
