@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Staff{% endblock %}
+{% block content %}
+<h3 class="mb-3">Staff accounts</h3>
+<div class="row g-3">
+  <div class="col-lg-8"><div class="card"><table class="table mb-0 align-middle">
+    <thead><tr><th>Username</th><th>Reset password</th><th></th></tr></thead><tbody>
+    {% for s in staff %}
+    <tr><td>{{ s.username }}</td>
+      <td><form method="post" action="{{ url_for('staff_password', uid=s.id) }}" class="d-flex gap-2">
+        <input name="password" type="password" minlength="6" class="form-control form-control-sm" placeholder="New password" required>
+        <button class="btn btn-sm btn-outline-primary">Update</button></form></td>
+      <td class="text-end"><form method="post" action="{{ url_for('staff_delete', uid=s.id) }}" onsubmit="return confirm('Remove {{ s.username }}?')"><button class="btn btn-sm btn-outline-danger">Remove</button></form></td></tr>
+    {% else %}<tr><td colspan="3" class="text-muted p-3">No staff accounts yet</td></tr>{% endfor %}
+    </tbody></table></div>
+    <p class="text-muted small mt-2">Staff can add and edit students, mark attendance, enter marks and download reports. Only admin can delete students, manage subjects and manage staff.</p></div>
+  <div class="col-lg-4"><form method="post" class="card card-body">
+    <h6>Add staff</h6>
+    <input name="username" class="form-control mb-2" placeholder="Username" required>
+    <input name="password" type="password" minlength="6" class="form-control mb-2" placeholder="Password (min 6 characters)" required>
+    <button class="btn btn-primary">Add staff</button></form></div>
+</div>
+{% endblock %}

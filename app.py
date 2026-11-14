@@ -577,6 +577,60 @@ def marks():
 
 
 # --------------------------------------------------------------------------
+# Staff management (admin only)
+# --------------------------------------------------------------------------
+@app.route("/staff", methods=["GET", "POST"])
+@role_required("admin")
+def staff():
+    db = get_db()
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        if not username or len(password) < 6:
+            flash("Enter a username and a password of at least 6 characters",
+                  "danger")
+        else:
+            try:
+                db.execute("INSERT INTO users(username,password_hash,role) "
+                           "VALUES(?,?,'teacher')",
+                           (username, generate_password_hash(password)))
+                db.commit()
+                flash(f"Staff added. Login: {username} / (the password you set)",
+                      "success")
+                return redirect(url_for("staff"))
+            except sqlite3.IntegrityError:
+                flash("That username is already taken", "danger")
+    rows = db.execute("SELECT id, username FROM users WHERE role='teacher' "
+                      "ORDER BY username").fetchall()
+    return render_template("staff.html", staff=rows)
+
+
+@app.route("/staff/<int:uid>/password", methods=["POST"])
+@role_required("admin")
+def staff_password(uid):
+    new = request.form["password"]
+    if len(new) < 6:
+        flash("Password must be at least 6 characters", "danger")
+    else:
+        db = get_db()
+        db.execute("UPDATE users SET password_hash=? WHERE id=? AND "
+                   "role='teacher'", (generate_password_hash(new), uid))
+        db.commit()
+        flash("Staff password updated", "success")
+    return redirect(url_for("staff"))
+
+
+@app.route("/staff/<int:uid>/delete", methods=["POST"])
+@role_required("admin")
+def staff_delete(uid):
+    db = get_db()
+    db.execute("DELETE FROM users WHERE id=? AND role='teacher'", (uid,))
+    db.commit()
+    flash("Staff removed", "success")
+    return redirect(url_for("staff"))
+
+
+# --------------------------------------------------------------------------
 # Reports (CSV, opens in Excel)
 # --------------------------------------------------------------------------
 def _csv_response(rows, header, filename):
